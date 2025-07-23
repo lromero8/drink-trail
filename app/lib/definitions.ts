@@ -70,6 +70,6 @@ export interface Trail {
   name: string;
   description: string;
   locations: Location[];
-  createdAt: Date;
+  created_at: string;
 }
  

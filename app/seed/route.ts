@@ -38,7 +38,7 @@ async function createTrailTable() {
       name VARCHAR(255) NOT NULL,
       description VARCHAR(255) NOT NULL,
       locations JSONB NOT NULL,
-      createdAt DATE NOT NULL
+      created_at DATE NOT NULL
     );
   `;
 }

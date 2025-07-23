@@ -1,5 +1,9 @@
 import { Metadata } from 'next';
-import { CreateTrail } from '../../ui/trails/buttons';
+import { CreateTrail } from '@/app/ui/trails/buttons';
+import { fetchTrailsPages } from '@/app/lib/data';
+import { TrailsTableSkeleton } from '@/app/ui/skeletons';
+import { Suspense } from 'react';
+import Table from '@/app/ui/trails/table';
  
 export const metadata: Metadata = {
   title: 'Trails',
@@ -11,10 +15,10 @@ export default async function Page(props: {
         page?: string;
     }>;
 }) {
-    // const searchParams = await props.searchParams;
-    // const query = searchParams?.query || '';
-    // const currentPage = Number(searchParams?.page) || 1;
-    // const totalPages = await fetchInvoicesPages(query);
+    const searchParams = await props.searchParams;
+    const query = searchParams?.query || '';
+    const currentPage = Number(searchParams?.page) || 1;
+    const totalPages = await fetchTrailsPages(query);
     
     return (
         <div className="w-full">
@@ -25,10 +29,10 @@ export default async function Page(props: {
                 {/* <Search placeholder="Search invoices..." /> */}
                 <CreateTrail />
             </div>
-            {/* <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
+            <Suspense key={query + currentPage} fallback={<TrailsTableSkeleton />}>
                 <Table query={query} currentPage={currentPage} />
             </Suspense>
-            <div className="mt-5 flex w-full justify-center">
+            {/* <div className="mt-5 flex w-full justify-center">
                 <Pagination totalPages={totalPages} />
             </div> */}
         </div>
