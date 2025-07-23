@@ -29,10 +29,24 @@ async function seedUsers() {
   return insertedUsers;
 }
 
+async function createTrailTable() {
+  await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS trails (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      locations JSONB NOT NULL,
+      createdAt DATE NOT NULL
+    );
+  `;
+}
+
 export async function GET() {
   try {
     await sql.begin(() => [
-      seedUsers()
+      seedUsers(),
+      createTrailTable()
     ]);
 
     return Response.json({ message: 'Database seeded successfully' });
