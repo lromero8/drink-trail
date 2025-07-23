@@ -5,6 +5,7 @@ import { TrailsTableSkeleton } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
 import Table from '@/app/ui/trails/table';
 import Search from '@/app/ui/search';
+import Pagination from '@/app/ui/trails/pagination';
  
 export const metadata: Metadata = {
   title: 'Trails',
@@ -33,9 +34,9 @@ export default async function Page(props: {
             <Suspense key={query + currentPage} fallback={<TrailsTableSkeleton />}>
                 <Table query={query} currentPage={currentPage} />
             </Suspense>
-            {/* <div className="mt-5 flex w-full justify-center">
+            <div className="mt-5 flex w-full justify-center">
                 <Pagination totalPages={totalPages} />
-            </div> */}
+            </div>
         </div>
     );
 }
