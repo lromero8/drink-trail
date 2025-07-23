@@ -64,3 +64,12 @@ export interface Location {
   name: string;
   drinks: Drink[];
 }
+
+export interface Trail {
+  id: string;
+  name: string;
+  description: string;
+  locations: Location[];
+  createdAt: Date;
+}
+ 

@@ -36,6 +36,7 @@ async function createTrailTable() {
     CREATE TABLE IF NOT EXISTS trails (
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
       name VARCHAR(255) NOT NULL,
+      description VARCHAR(255) NOT NULL,
       locations JSONB NOT NULL,
       createdAt DATE NOT NULL
     );
