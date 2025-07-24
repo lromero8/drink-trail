@@ -46,8 +46,30 @@ export async function fetchTrailsPages(query: string) {
 
     const totalPages = Math.ceil(Number(data[0].count) / ITEMS_PER_PAGE);
     return totalPages;
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch total number of trails.');
+  }
+}
+
+export async function fetchTrailById(trail_id: string) {
+  try {
+    const trail = await sql<Trail[]>`
+      SELECT
+        trails.id,
+        trails.name,
+        trails.description,
+        trails.locations,
+        trails.created_at
+      FROM trails
+      WHERE trails.id = ${trail_id}
+    `;
+
+    return trail[0] || null;
+  }
+  catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch trail by ID.');
   }
 }

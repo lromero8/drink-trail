@@ -59,7 +59,6 @@ export async function createTrail(prevState: TrailState, formData: FormData) {
     });
 
     // If form validation fails, return errors early. Otherwise, continue.
-    console.log('Validated Fields:', validatedFields);
     if (!validatedFields.success) {
         return {
             errors: validatedFields.error.flatten().fieldErrors,
@@ -70,16 +69,18 @@ export async function createTrail(prevState: TrailState, formData: FormData) {
     // Prepare data for insertion into the database
     const { name, description } = validatedFields.data;
     const created_at = new Date().toISOString().split('T')[0];
+    let newTrailId;
     try {
-        await sql`
+        const result = await sql`
             INSERT INTO trails (name, description, locations, created_at)
             VALUES (${name}, ${description}, ${[]}, ${created_at})
+            RETURNING id
         `;
-    
+        newTrailId = result[0].id;
     }
     catch (error) {
         console.error(error);
     }
-    revalidatePath(`/dashboard/trails`);
-    redirect(`/dashboard/trails`);
+    revalidatePath(`/dashboard/trails/${newTrailId}/locations`);
+    redirect(`/dashboard/trails/${newTrailId}/locations`);
 }
