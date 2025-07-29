@@ -4,29 +4,45 @@ import { Trail } from './definitions';
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 const ITEMS_PER_PAGE = 6;
+
+
+
+export interface TrailWithLocationNames extends Trail {
+  location_names: string[];
+}
+
 export async function fetchFilteredTrails(
   query: string,
-  currentPage: number,
-) {
+  currentPage: number
+): Promise<TrailWithLocationNames[]> {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
-    const trails = await sql<Trail[]>`
+    const trails = await sql`
       SELECT
-        trails.id,
-        trails.name,
-        trails.description,
-        trails.created_at
-      FROM trails
+        t.id,
+        t.name,
+        t.description,
+        t.created_at,
+        COALESCE(
+          json_agg(l.name) FILTER (WHERE l.id IS NOT NULL), '[]'
+        ) AS location_names
+      FROM trails t
+      LEFT JOIN locations l ON l.trail_id = t.id
       WHERE
-        trails.name ILIKE ${`%${query}%`} OR
-        trails.description ILIKE ${`%${query}%`} OR
-        trails.created_at::text ILIKE ${`%${query}%`}
-      ORDER BY trails.created_at DESC
+        t.name ILIKE ${`%${query}%`} OR
+        t.description ILIKE ${`%${query}%`} OR
+        t.created_at::text ILIKE ${`%${query}%`}
+      GROUP BY t.id, t.name, t.description, t.created_at
+      ORDER BY t.created_at DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
 
-    return trails;
+    // Parse location_names from JSON for each trail
+    return trails.map((trail: any) => ({
+      ...trail,
+      location_names: typeof trail.location_names === 'string' ? JSON.parse(trail.location_names) : trail.location_names,
+    }));
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch trails.');

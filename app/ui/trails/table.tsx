@@ -33,8 +33,8 @@ export default async function TrailsTable({
                       {trail.description}
                     </p>
                     <p>
-                      {trail.locations.length > 0
-                        ? `Locations: ${trail.locations.join(', ')}`
+                      {trail.location_names.length > 0
+                        ? `Locations: ${trail.location_names.join(', ')}`
                         : 'No locations available'}
                     </p>
                     <p>{formatDateToLocal(trail.created_at)}</p>
@@ -82,8 +82,8 @@ export default async function TrailsTable({
                     {trail.description}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {trail.locations.length > 0
-                      ? trail.locations.join(', ')
+                    {trail.location_names.length > 0
+                      ? trail.location_names.join(', ')
                       : 'No locations available'}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
