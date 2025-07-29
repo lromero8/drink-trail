@@ -83,3 +83,51 @@ export async function createTrail(prevState: TrailState, formData: FormData) {
     revalidatePath(`/dashboard/trails/${newTrailId}/locations`);
     redirect(`/dashboard/trails/${newTrailId}/locations`);
 }
+
+export interface LocationState {
+    errors?: {
+        name?: string[];
+    };
+    message?: string | null;
+};
+
+const LocationFormSchema = z.object({
+    id: z.string(),
+    name: z.string({
+        invalid_type_error: 'Please enter a name.',
+    }).min(1, { message: 'Field is required.' })
+});
+
+const CreateLocation = LocationFormSchema.omit({ id: true });
+export async function createLocation(prevState: LocationState, formData: FormData) {
+    // Validate form fields using Zod (only name)
+    const validatedFields = CreateLocation.safeParse({
+        name: formData.get('name')
+    });
+
+    // If form validation fails, return errors early. Otherwise, continue.
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Missing Fields. Failed to Create Location.',
+        };
+    }
+    
+    // Get trail_id directly from formData (not validated)
+    const trail_id = String(formData.get('trail_id'));
+    const { name } = validatedFields.data;
+    let newLocationId;
+    try {
+        const result = await sql`
+            INSERT INTO locations (trail_id, name)
+            VALUES (${trail_id}, ${name})
+            RETURNING id
+        `;
+        newLocationId = result[0].id;
+    }
+    catch (error) {
+        console.error(error);
+    }
+
+    redirect(`/dashboard/trails/${trail_id}/locations/${newLocationId}/add-drinks`);
+}
