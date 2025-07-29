@@ -57,19 +57,23 @@ interface SoftDrink extends BaseDrink {
   softDrinkType: SoftDrinkType;
 }
 
-export type Drink = Beer | Cocktail | SoftDrink;
+export type DrinkType = Beer | Cocktail | SoftDrink;
+
+export interface Drink {
+  id: string;
+  location_id: string;
+  drink_type: DrinkType;
+}
 
 export interface Location {
   id: string;
+  trail_id: string;
   name: string;
-  drinks: Drink[];
 }
 
 export interface Trail {
   id: string;
   name: string;
   description: string;
-  locations: Location[];
   created_at: string;
 }
- 

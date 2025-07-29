@@ -16,7 +16,6 @@ export async function fetchFilteredTrails(
         trails.id,
         trails.name,
         trails.description,
-        trails.locations,
         trails.created_at
       FROM trails
       WHERE
@@ -60,7 +59,6 @@ export async function fetchTrailById(trail_id: string) {
         trails.id,
         trails.name,
         trails.description,
-        trails.locations,
         trails.created_at
       FROM trails
       WHERE trails.id = ${trail_id}

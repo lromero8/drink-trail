@@ -45,11 +45,10 @@ const TrailFormSchema = z.object({
     description: z.string({
         invalid_type_error: 'Please enter a description.',
     }).min(1, { message: 'Field is required.' }),
-    locations: z.array(z.string()).optional(),
     created_at: z.string()
 });
 
-const CreateTrail = TrailFormSchema.omit({ id: true, locations: true, created_at: true });
+const CreateTrail = TrailFormSchema.omit({ id: true, created_at: true });
 
 export async function createTrail(prevState: TrailState, formData: FormData) {
     // Validate form fields using Zod
@@ -72,8 +71,8 @@ export async function createTrail(prevState: TrailState, formData: FormData) {
     let newTrailId;
     try {
         const result = await sql`
-            INSERT INTO trails (name, description, locations, created_at)
-            VALUES (${name}, ${description}, ${[]}, ${created_at})
+            INSERT INTO trails (name, description, created_at)
+            VALUES (${name}, ${description}, ${created_at})
             RETURNING id
         `;
         newTrailId = result[0].id;
