@@ -49,6 +49,7 @@ const TrailFormSchema = z.object({
 });
 
 const CreateTrail = TrailFormSchema.omit({ id: true, created_at: true });
+const UpdateTrail = TrailFormSchema.omit({ id: true, created_at: true });
 
 export async function createTrail(prevState: TrailState, formData: FormData) {
     // Validate form fields using Zod
@@ -84,6 +85,39 @@ export async function createTrail(prevState: TrailState, formData: FormData) {
     redirect(`/dashboard/trails/${newTrailId}/locations`);
 }
 
+export async function updateTrail(id: string, prevState: TrailState, formData: FormData) {
+    // Validate form fields using Zod
+    const validatedFields = UpdateTrail.safeParse({
+        name: formData.get('name'),
+        description: formData.get('description'),
+    });
+
+    // If form validation fails, return errors early. Otherwise, continue.
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Missing Fields. Failed to Edit Invoice.',
+        };
+    }
+
+    const { name, description } = validatedFields.data;
+
+    try {
+    
+        await sql`
+            UPDATE trails
+            SET name = ${name}, description = ${description}
+            WHERE id = ${id}
+        `;
+    }
+    catch (error) {
+        console.error(error);    
+    }
+
+    revalidatePath('/dashboard/trails');
+    redirect('/dashboard/trails');
+}
+
 export interface LocationState {
     errors?: {
         name?: string[];
@@ -99,6 +133,7 @@ const LocationFormSchema = z.object({
 });
 
 const CreateLocation = LocationFormSchema.omit({ id: true });
+
 export async function createLocation(prevState: LocationState, formData: FormData) {
     // Validate form fields using Zod (only name)
     const validatedFields = CreateLocation.safeParse({

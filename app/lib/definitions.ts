@@ -77,3 +77,9 @@ export interface Trail {
   description: string;
   created_at: string;
 }
+
+export type TrailForm = {
+  id: string;
+  name: string;
+  description: string;
+};

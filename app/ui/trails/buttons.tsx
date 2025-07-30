@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { PlusIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon } from '@heroicons/react/24/outline';
 
 export function CreateTrail() {
   return (
@@ -9,6 +9,17 @@ export function CreateTrail() {
     >
       <span className="hidden md:block">Create Trail</span>{' '}
       <PlusIcon className="h-5 md:ml-4" />
+    </Link>
+  );
+}
+
+export function UpdateTrail({ id }: { id: string }) {
+  return (
+    <Link
+      href={`/dashboard/trails/${id}/edit`}
+      className="rounded-md border p-2 hover:bg-gray-100"
+    >
+      <PencilIcon className="w-5" />
     </Link>
   );
 }

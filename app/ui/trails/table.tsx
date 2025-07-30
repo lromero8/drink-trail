@@ -1,5 +1,6 @@
 import { formatDateToLocal } from '@/app/lib/utils';
 import { fetchFilteredTrails } from '@/app/lib/data';
+import { UpdateTrail } from '@/app/ui/trails/buttons';
 
 export default async function TrailsTable({
   query,
@@ -39,10 +40,10 @@ export default async function TrailsTable({
                     </p>
                     <p>{formatDateToLocal(trail.created_at)}</p>
                   </div>
-                  {/* <div className="flex justify-end gap-2">
-                    <UpdateInvoice id={trail.id} />
-                    <DeleteInvoice id={trail.id} />
-                  </div> */}
+                  <div className="flex justify-end gap-2">
+                    <UpdateTrail id={trail.id} />
+                    {/* <DeleteInvoice id={trail.id} /> */}
+                  </div>
                 </div>
               </div>
             ))}
@@ -89,12 +90,12 @@ export default async function TrailsTable({
                   <td className="whitespace-nowrap px-3 py-3">
                     {formatDateToLocal(trail.created_at)}
                   </td>
-                  {/* <td className="whitespace-nowrap py-3 pl-6 pr-3">
+                  <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
-                      <UpdateInvoice id={trail.id} />
-                      <DeleteInvoice id={trail.id} />
+                      <UpdateTrail id={trail.id} />
+                      {/* <DeleteInvoice id={trail.id} /> */}
                     </div>
-                  </td> */}
+                  </td>
                 </tr>
               ))}
             </tbody>

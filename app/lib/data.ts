@@ -1,5 +1,5 @@
 import postgres from 'postgres';
-import { Trail } from './definitions';
+import { Trail, TrailForm } from './definitions';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -9,6 +9,24 @@ const ITEMS_PER_PAGE = 6;
 
 export interface TrailWithLocationNames extends Trail {
   location_names: string[];
+}
+
+export async function fetchTrailById(id: string) {
+  try {
+    const data = await sql<TrailForm[]>`
+      SELECT
+        trails.id,
+        trails.name,
+        trails.description
+      FROM trails
+      WHERE trails.id = ${id};
+    `;
+
+    return data[0];
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch trail.');
+  }
 }
 
 export async function fetchFilteredTrails(
