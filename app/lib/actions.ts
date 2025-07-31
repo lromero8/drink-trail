@@ -164,5 +164,85 @@ export async function createLocation(prevState: LocationState, formData: FormDat
         console.error(error);
     }
 
+    revalidatePath(`/dashboard/trails/${trail_id}/locations/${newLocationId}/add-drinks`);
     redirect(`/dashboard/trails/${trail_id}/locations/${newLocationId}/add-drinks`);
+}
+
+
+export interface DrinkState {
+    errors?: {
+        size?: string[];
+        type?: string[];
+        beerType?: string[];
+        cocktailType?: string[];
+        softDrinkType?: string[];
+    };
+    message?: string | null;
+};
+
+const DrinkFormSchema = z.object({
+    trail_id: z.string(),
+    location_id: z.string(),
+    size: z.enum(["0.2L", "0.33L", "0.5L", "1L"], { invalid_type_error: 'Please select a size.' }),
+    type: z.enum(["beer", "cocktail", "soft-drink"], { invalid_type_error: 'Please select a type.' }),
+    beerType: z.preprocess(val => val === null ? undefined : val, z.string().optional()),
+    cocktailType: z.preprocess(val => val === null ? undefined : val, z.string().optional()),
+    softDrinkType: z.preprocess(val => val === null ? undefined : val, z.string().optional()),
+    isAlcoholic: z.preprocess((val) => val === 'on' || val === true, z.boolean()),
+});
+
+export async function createDrink(prevState: DrinkState, formData: FormData) {
+    // Validate form fields using Zod
+    const validatedFields = DrinkFormSchema.safeParse({
+        trail_id: formData.get('trail_id'),
+        location_id: formData.get('location_id'),
+        size: formData.get('size'),
+        type: formData.get('type'),
+        beerType: formData.get('beerType'),
+        cocktailType: formData.get('cocktailType'),
+        softDrinkType: formData.get('softDrinkType'),
+        isAlcoholic: formData.get('isAlcoholic'),
+    });
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Missing Fields. Failed to Create Drink.',
+        };
+    }
+
+    const { trail_id, location_id, size, type, beerType, cocktailType, softDrinkType, isAlcoholic } = validatedFields.data;
+
+    // Build drink_type JSON for DB
+    let drink_type: any = {};
+    if (type === 'beer') drink_type.beerType = beerType;
+    if (type === 'cocktail') drink_type.cocktailType = cocktailType;
+    if (type === 'soft-drink') drink_type.softDrinkType = softDrinkType;
+
+    try {
+        await sql`
+      INSERT INTO drinks (location_id, drink_type, size, type, is_alcoholic, beer_type, cocktail_type, soft_drink_type)
+      VALUES (
+        ${location_id},
+        ${drink_type},
+        ${size},
+        ${type},
+        ${isAlcoholic},
+        ${beerType || null},
+        ${cocktailType || null},
+        ${softDrinkType || null}
+      )
+    `;
+    }
+    catch (error) {
+        console.error(error);
+        return {
+            errors: {},
+            message: 'Database error. Failed to Create Drink.',
+        };
+    }
+
+    // Redirect to the location's page after creation
+    revalidatePath(`/dashboard/trails/${trail_id}/locations/${location_id}`);
+    redirect(`/dashboard/trails/${trail_id}/locations/${location_id}`);
 }

@@ -1,14 +1,15 @@
 import Breadcrumbs from '@/app/ui/trails/breadcrumbs';
 import { notFound } from 'next/dist/client/components/navigation';
-import { fetchTrailWithLocationsById } from '@/app/lib/data';
+import Form from '@/app/ui/drinks/create-form';
+import { fetchLocationById } from '@/app/lib/data';
 
 export default async function Page(props: { params: Promise<{ trail_id: string; location_id: string }> }) {
     const params = await props.params;
     const trail_id = params.trail_id;
     const location_id = params.location_id;
-    const trail = await fetchTrailWithLocationsById(trail_id);
+    const location = await fetchLocationById(location_id);
 
-    if (!trail) {
+    if (!location) {
         notFound();
     }
 
@@ -26,7 +27,7 @@ export default async function Page(props: { params: Promise<{ trail_id: string; 
                 ]}
             />
             {/* This will be the form for adding a new drinks to a location */}
-            {/* <Form trail={trail} /> */}
+            <Form trail_id={trail_id} location_id={location_id} />
         </main>
     );
 }

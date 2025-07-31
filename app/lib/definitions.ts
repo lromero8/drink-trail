@@ -29,7 +29,7 @@ const COCKTAIL_ALCOHOL_PERCENTAGE: Record<CocktailType, number> = {
   'Negroni': 0.24,
 };
 
-type DrinkSize = '0.2L' | '0.33L' | '0.5L' | '1L';
+export type DrinkSize = '0.2L' | '0.33L' | '0.5L' | '1L';
 
 interface BaseDrink {
   id: string;
@@ -38,19 +38,19 @@ interface BaseDrink {
   isAlcoholic: boolean;
 }
 
-type BeerType = 'Agustiner' | 'Berliner Kindl' | 'Bitburger' | 'Kölsch' | 'Erdinger' | 'Franziskaner' | 'Krombacher' | 'Paulaner' | 'Warsteiner';
+export type BeerType = 'Agustiner' | 'Berliner Kindl' | 'Bitburger' | 'Kölsch' | 'Erdinger' | 'Franziskaner' | 'Krombacher' | 'Paulaner' | 'Warsteiner';
 interface Beer extends BaseDrink {
   type: 'beer';
   beerType: BeerType;
 }
 
-type CocktailType = 'Mojito' | 'Margarita' | 'Aperol Spritz' | 'Limoncello Spritz' | 'Pina Colada' | 'Cosmopolitan' | 'Old Fashioned' | 'Negroni';
+export type CocktailType = 'Mojito' | 'Margarita' | 'Aperol Spritz' | 'Limoncello Spritz' | 'Pina Colada' | 'Cosmopolitan' | 'Old Fashioned' | 'Negroni';
 interface Cocktail extends BaseDrink {
   type: 'cocktail';
   cocktailType: CocktailType;
 }
 
-type SoftDrinkType = 'Cola' | 'Sprite' | 'Orange Juice' | 'Apple Juice';
+export type SoftDrinkType = 'Cola' | 'Sprite' | 'Orange Juice' | 'Apple Juice';
 interface SoftDrink extends BaseDrink {
   type: 'soft-drink';
   isAlcoholic: false;

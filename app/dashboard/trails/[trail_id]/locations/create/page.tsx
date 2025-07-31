@@ -18,7 +18,7 @@ export default async function Page(props: { params: Promise<{ trail_id: string }
                 breadcrumbs={[
                     { label: 'Locations', href: `/dashboard/trails/${trail_id}/locations` },
                     {
-                        label: `Create Location for Trail: ${trail.name}`,
+                        label: `Create Location for ${trail.name}`,
                         href: `/dashboard/trails/${trail_id}/locations/create`,
                         active: true,
                     }
