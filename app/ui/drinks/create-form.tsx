@@ -2,7 +2,6 @@
 
 import { useActionState, useState } from 'react';
 import { createDrink, DrinkState } from '@/app/lib/actions';
-import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 import { BeerType, CocktailType, DrinkSize, SoftDrinkType } from '@/app/lib/definitions';
 
@@ -42,7 +41,17 @@ interface FormProps {
 }
 
 export default function Form({ trail_id, location_id }: FormProps) {
-  const initialState: DrinkState = { message: null, errors: {} };
+  // Initialize with proper empty state matching DrinkState interface
+  const initialState: DrinkState = { 
+    message: null, 
+    errors: {
+      size: undefined,
+      type: undefined,
+      beerType: undefined,
+      cocktailType: undefined,
+      softDrinkType: undefined
+    } 
+  };
   const [state, formAction] = useActionState(createDrink, initialState);
   const [selectedType, setSelectedType] = useState<string>("");
   const [isAlcoholic, setIsAlcoholic] = useState<boolean>(true);
@@ -210,21 +219,15 @@ export default function Form({ trail_id, location_id }: FormProps) {
         </div>
 
         <div aria-live="polite" aria-atomic="true">
-          {state.errors &&
-            <p className="mt-2 text-sm text-red-500">
+          {state.message && (
+            <p className={`mt-2 text-sm ${state.message.includes('Failed') ? 'text-red-500' : 'text-green-500'}`}>
               {state.message}
             </p>
-          }
+          )}
         </div>
       </div>
       <div className="mt-6 flex justify-end gap-4">
-        <Link
-          href="/dashboard/trails"
-          className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
-        >
-          Cancel
-        </Link>
-        <Button type="submit">Create Drink</Button>
+        <Button type="submit">Add Drink</Button>
       </div>
     </form>
   );

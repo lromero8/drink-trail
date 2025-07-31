@@ -1,5 +1,6 @@
 import Breadcrumbs from "@/app/ui/trails/breadcrumbs";
 import { fetchDrinksByLocationId } from "@/app/lib/data";
+import Form from '@/app/ui/drinks/create-form';
 
 
 export default async function Page(props: { params: Promise<{ trail_id: string; location_id: string }> }) {
@@ -16,11 +17,13 @@ export default async function Page(props: { params: Promise<{ trail_id: string; 
                     { label: 'Locations', href: `/dashboard/trails/${trail_id}/locations` },
                     {
                         label: 'Drinks in Location',
-                        href: `/dashboard/trails/${trail_id}/locations/${location_id}/`,
+                        href: `/dashboard/trails/${trail_id}/locations/${location_id}`,
                         active: true,
                     }
                 ]}
             />
+            <Form trail_id={trail_id} location_id={location_id} />
+
             {/* This will be the drinks drank in a location */}
             <h1>Drinks in Location</h1>
             <ul>
