@@ -5,6 +5,16 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 const ITEMS_PER_PAGE = 6;
 
+// Interface for the drink data returned from fetchDrinksByLocationId
+export interface DrinkDisplay {
+  id: string;
+  location_id: string;
+  type: string; // general category: beer, cocktail, soft-drink
+  typeName: string; // specific type: Cola, Mojito, etc.
+  size: string;
+  isAlcoholic: boolean;
+}
+
 
 
 export interface TrailWithLocationNames extends Trail {
@@ -148,27 +158,52 @@ export async function fetchLocationById(location_id: string) {
   }
 }
 
-export async function fetchDrinksByLocationId(location_id: string) {
+export async function fetchDrinksByLocationId(location_id: string): Promise<DrinkDisplay[]> {
   try {
+    // Direct query using the new flattened structure
     const data = await sql`
       SELECT
-        drinks.id,
-        drinks.location_id,
-        drinks.type,
-        drinks.size
+        id,
+        location_id,
+        category,
+        specific_type,
+        size,
+        is_alcoholic
       FROM drinks
-      WHERE drinks.location_id = ${location_id};
+      WHERE location_id = ${location_id};
     `;
 
-    return data.map((drink: any) => ({
-      id: drink.id,
-      location_id: drink.location_id,
-      type: drink.type,
-      size: drink.size
-    }));
+    // Log the first drink to see structure
+    if (data.length > 0) {
+      console.log('Sample drink data with new schema:', JSON.stringify(data[0], null, 2));
+    }
+
+    return data.map((drink: any) => {
+      if (!drink) {
+        console.error('Encountered null or undefined drink in result set');
+        return {
+          id: 'unknown',
+          location_id: location_id,
+          type: 'Unknown',
+          typeName: 'Unknown',
+          size: 'Unknown',
+          isAlcoholic: false
+        };
+      }
+
+      // Much simpler mapping with the flattened structure
+      return {
+        id: drink.id,
+        location_id: drink.location_id,
+        type: drink.category,
+        typeName: drink.specific_type,
+        size: drink.size,
+        isAlcoholic: drink.is_alcoholic
+      };
+    });
   }
   catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch drinks by location ID.');
-  }
+  } 
 }

@@ -24,15 +24,46 @@ export default async function Page(props: { params: Promise<{ trail_id: string; 
             />
             <Form trail_id={trail_id} location_id={location_id} />
 
-            {/* This will be the drinks drank in a location */}
+            {/* Display drinks in a location with detailed information */}
             <h1>Drinks in Location</h1>
-            <ul>
-                {drinks.map(drink => (
-                    <li key={drink.id}>
-                        - {drink.type} - {drink.size}
-                    </li>
-                ))}
-            </ul>
+            <div className="mt-6">
+                <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                        <tr>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Type
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Category
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Size
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Alcoholic
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                        {drinks.map(drink => (
+                            <tr key={drink.id}>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {drink.typeName}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {drink.type}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {drink.size}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {drink.isAlcoholic ? 'Yes' : 'No'}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </main>
     );
 }
