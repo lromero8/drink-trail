@@ -57,13 +57,10 @@ async function createSchema() {
     CREATE TABLE IF NOT EXISTS drinks (
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
       location_id UUID NOT NULL REFERENCES locations(id) ON DELETE CASCADE,
-      drink_type JSONB NOT NULL,
-      size VARCHAR(10) NOT NULL,
-      type VARCHAR(50) NOT NULL,
-      is_alcoholic BOOLEAN NOT NULL,
-      beer_type VARCHAR(50),
-      cocktail_type VARCHAR(50),
-      soft_drink_type VARCHAR(50)
+      category VARCHAR(50) NOT NULL CHECK (category IN ('beer', 'cocktail', 'soft-drink')),
+      specific_type VARCHAR(50) NOT NULL,
+      size VARCHAR(10) NOT NULL CHECK (size IN ('0.2L', '0.33L', '0.5L', '1L')),
+      is_alcoholic BOOLEAN NOT NULL
     );
   `;
 }

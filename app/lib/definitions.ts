@@ -5,8 +5,18 @@ export type User = {
   password: string;
 };
 
-// Lookup tables
-const BEER_ALCOHOL_PERCENTAGE: Record<BeerType, number> = {
+// Enum-like types for drink categories
+export type DrinkCategory = 'beer' | 'cocktail' | 'soft-drink';
+
+// Specific drink types
+export type BeerType = 'Agustiner' | 'Berliner Kindl' | 'Bitburger' | 'Kölsch' | 'Erdinger' | 'Franziskaner' | 'Krombacher' | 'Paulaner' | 'Warsteiner';
+export type CocktailType = 'Mojito' | 'Margarita' | 'Aperol Spritz' | 'Limoncello Spritz' | 'Pina Colada' | 'Cosmopolitan' | 'Old Fashioned' | 'Negroni';
+export type SoftDrinkType = 'Cola' | 'Sprite' | 'Orange Juice' | 'Apple Juice';
+
+export type DrinkSize = '0.2L' | '0.33L' | '0.5L' | '1L';
+
+// Lookup tables for alcohol percentages
+export const BEER_ALCOHOL_PERCENTAGE: Record<BeerType, number> = {
   'Agustiner': 0.052,
   'Berliner Kindl': 0.05,
   'Bitburger': 0.048,
@@ -18,7 +28,7 @@ const BEER_ALCOHOL_PERCENTAGE: Record<BeerType, number> = {
   'Warsteiner': 0.049,
 };
 
-const COCKTAIL_ALCOHOL_PERCENTAGE: Record<CocktailType, number> = {
+export const COCKTAIL_ALCOHOL_PERCENTAGE: Record<CocktailType, number> = {
   'Mojito': 0.13,
   'Margarita': 0.15,
   'Aperol Spritz': 0.11,
@@ -29,40 +39,14 @@ const COCKTAIL_ALCOHOL_PERCENTAGE: Record<CocktailType, number> = {
   'Negroni': 0.24,
 };
 
-export type DrinkSize = '0.2L' | '0.33L' | '0.5L' | '1L';
-
-interface BaseDrink {
-  id: string;
-  size: DrinkSize;
-  type: string; // discriminant
-  isAlcoholic: boolean;
-}
-
-export type BeerType = 'Agustiner' | 'Berliner Kindl' | 'Bitburger' | 'Kölsch' | 'Erdinger' | 'Franziskaner' | 'Krombacher' | 'Paulaner' | 'Warsteiner';
-interface Beer extends BaseDrink {
-  type: 'beer';
-  beerType: BeerType;
-}
-
-export type CocktailType = 'Mojito' | 'Margarita' | 'Aperol Spritz' | 'Limoncello Spritz' | 'Pina Colada' | 'Cosmopolitan' | 'Old Fashioned' | 'Negroni';
-interface Cocktail extends BaseDrink {
-  type: 'cocktail';
-  cocktailType: CocktailType;
-}
-
-export type SoftDrinkType = 'Cola' | 'Sprite' | 'Orange Juice' | 'Apple Juice';
-interface SoftDrink extends BaseDrink {
-  type: 'soft-drink';
-  isAlcoholic: false;
-  softDrinkType: SoftDrinkType;
-}
-
-export type DrinkType = Beer | Cocktail | SoftDrink;
-
+// Simplified flat structure for database
 export interface Drink {
   id: string;
   location_id: string;
-  drink_type: DrinkType;
+  category: DrinkCategory;  // 'beer', 'cocktail', or 'soft-drink'
+  specific_type: string;    // The specific type (e.g., 'Cola', 'Mojito')
+  size: DrinkSize;
+  is_alcoholic: boolean;
 }
 
 export interface Location {
@@ -78,7 +62,7 @@ export interface Trail {
   created_at: string;
 }
 
-export type TrailForm = {
+export interface TrailForm {
   id: string;
   name: string;
   description: string;
