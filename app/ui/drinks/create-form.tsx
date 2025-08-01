@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useState, useEffect } from 'react';
 import { createDrink, DrinkState } from '@/app/lib/actions';
 import { Button } from '@/app/ui/button';
 import { BeerType, CocktailType, DrinkSize, SoftDrinkType } from '@/app/lib/definitions';
@@ -41,49 +41,71 @@ interface FormProps {
 }
 
 export default function Form({ trail_id, location_id }: FormProps) {
-  // Initialize with proper empty state matching DrinkState interface
+  // Simple state for the form
   const initialState: DrinkState = { 
     message: null, 
     errors: {
       size: undefined,
-      type: undefined,
+      category: undefined,
+      specific_type: undefined,
       beerType: undefined,
       cocktailType: undefined,
       softDrinkType: undefined
     } 
   };
+  
   const [state, formAction] = useActionState(createDrink, initialState);
-  const [selectedType, setSelectedType] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedSize, setSelectedSize] = useState<string>("");
+  const [specificType, setSpecificType] = useState<string>("");
   const [isAlcoholic, setIsAlcoholic] = useState<boolean>(true);
+  
+  // Soft drinks are never alcoholic
+  const isSoftDrink = selectedCategory === 'soft-drink';
+  
+  // Clear form on successful submission
+  useEffect(() => {
+    if (state.message && !state.message.includes('Failed')) {
+      // Form was successfully submitted, reset the form
+      setSelectedCategory("");
+      setSelectedSize("");
+      setSpecificType("");
+      setIsAlcoholic(true);
+    }
+  }, [state.message]);
+  
+  // When category changes, reset the specific type
+  useEffect(() => {
+    setSpecificType("");
+  }, [selectedCategory]);
 
-  // If soft-drink is selected, always uncheck and disable isAlcoholic
-  const isSoftDrink = selectedType === 'soft-drink';
   return (
     <form action={formAction}>
       <input type="hidden" name="trail_id" value={trail_id} />
       <input type="hidden" name="location_id" value={location_id} />
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
-        {/* Drink type */}
+        {/* Drink category */}
         <div className="mb-4">
-          <label htmlFor="type" className="mb-2 block text-sm font-medium">
-            Type
+          <label htmlFor="category" className="mb-2 block text-sm font-medium">
+            Category *
           </label>
           <select
-            id="type"
-            name="type"
+            id="category"
+            name="category"
             className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2"
-            value={selectedType}
-            onChange={e => setSelectedType(e.target.value)}
-            aria-describedby="type-error"
+            value={selectedCategory}
+            onChange={e => setSelectedCategory(e.target.value)}
+            aria-describedby="category-error"
+            required
           >
-            <option value="">Select type</option>
+            <option value="">Select category</option>
             {DRINK_TYPES.map((type) => (
               <option key={type} value={type}>{type}</option>
             ))}
           </select>
-          <div id="type-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.type &&
-              state.errors.type.map((error: string) => (
+          <div id="category-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.category &&
+              state.errors.category.map((error: string) => (
                 <p className="mt-2 text-sm text-red-500" key={error}>
                   {error}
                 </p>
@@ -91,86 +113,61 @@ export default function Form({ trail_id, location_id }: FormProps) {
           </div>
         </div>
 
-        {/* Conditionally show type-specific dropdown */}
-        {selectedType === 'beer' && (
+        {/* Specific type selector - changes based on category */}
+        {selectedCategory && (
           <div className="mb-4">
-            <label htmlFor="beerType" className="mb-2 block text-sm font-medium">
-              Beer Type
+            <label htmlFor="specific-type" className="mb-2 block text-sm font-medium">
+              {selectedCategory === 'beer' 
+                ? 'Beer Type *' 
+                : selectedCategory === 'cocktail' 
+                  ? 'Cocktail Type *' 
+                  : 'Soft Drink Type *'
+              }
             </label>
             <select
-              id="beerType"
-              name="beerType"
+              id="specific-type"
+              name={selectedCategory === 'beer' 
+                ? 'beerType' 
+                : selectedCategory === 'cocktail' 
+                  ? 'cocktailType' 
+                  : 'softDrinkType'
+              }
               className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2"
-              defaultValue=""
-              aria-describedby="beerType-error"
+              value={specificType}
+              onChange={e => setSpecificType(e.target.value)}
+              aria-describedby="specific-type-error"
+              required
             >
-              <option value="">Select beer type</option>
-              {BEER_TYPES.map((type) => (
+              <option value="">
+                {selectedCategory === 'beer'
+                  ? 'Select beer type'
+                  : selectedCategory === 'cocktail'
+                    ? 'Select cocktail type'
+                    : 'Select soft drink type'
+                }
+              </option>
+              {selectedCategory === 'beer' && BEER_TYPES.map((type) => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+              {selectedCategory === 'cocktail' && COCKTAIL_TYPES.map((type) => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+              {selectedCategory === 'soft-drink' && SOFTDRINK_TYPES.map((type) => (
                 <option key={type} value={type}>{type}</option>
               ))}
             </select>
-            <div id="beerType-error" aria-live="polite" aria-atomic="true">
-              {state.errors?.beerType &&
-                state.errors.beerType.map((error: string) => (
-                  <p className="mt-2 text-sm text-red-500" key={error}>
-                    {error}
-                  </p>
-                ))}
-            </div>
-          </div>
-        )}
-        {selectedType === 'cocktail' && (
-          <div className="mb-4">
-            <label htmlFor="cocktailType" className="mb-2 block text-sm font-medium">
-              Cocktail Type
-            </label>
-            <select
-              id="cocktailType"
-              name="cocktailType"
-              className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2"
-              defaultValue=""
-              aria-describedby="cocktailType-error"
-            >
-              <option value="">Select cocktail type</option>
-              {COCKTAIL_TYPES.map((type) => (
-                <option key={type} value={type}>{type}</option>
+            <div id="specific-type-error" aria-live="polite" aria-atomic="true">
+              {state.errors?.[
+                selectedCategory === 'beer' 
+                  ? 'beerType' 
+                  : selectedCategory === 'cocktail' 
+                    ? 'cocktailType' 
+                    : 'softDrinkType'
+              ]?.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500" key={error}>
+                  {error}
+                </p>
               ))}
-            </select>
-            <div id="cocktailType-error" aria-live="polite" aria-atomic="true">
-              {state.errors?.cocktailType &&
-                state.errors.cocktailType.map((error: string) => (
-                  <p className="mt-2 text-sm text-red-500" key={error}>
-                    {error}
-                  </p>
-                ))}
-            </div>
-          </div>
-        )}
-
-        {selectedType === 'soft-drink' && (
-          <div className="mb-4">
-            <label htmlFor="softDrinkType" className="mb-2 block text-sm font-medium">
-              Soft Drink Type
-            </label>
-            <select
-              id="softDrinkType"
-              name="softDrinkType"
-              className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2"
-              defaultValue=""
-              aria-describedby="softDrinkType-error"
-            >
-              <option value="">Select soft drink type</option>
-              {SOFTDRINK_TYPES.map((type) => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-            <div id="softDrinkType-error" aria-live="polite" aria-atomic="true">
-              {state.errors?.softDrinkType &&
-                state.errors.softDrinkType.map((error: string) => (
-                  <p className="mt-2 text-sm text-red-500" key={error}>
-                    {error}
-                  </p>
-                ))}
             </div>
           </div>
         )}
@@ -178,14 +175,16 @@ export default function Form({ trail_id, location_id }: FormProps) {
         {/* Drink size */}
         <div className="mb-4">
           <label htmlFor="size" className="mb-2 block text-sm font-medium">
-            Size
+            Size *
           </label>
           <select
             id="size"
             name="size"
             className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2"
-            defaultValue=""
+            value={selectedSize}
+            onChange={e => setSelectedSize(e.target.value)}
             aria-describedby="size-error"
+            required
           >
             <option value="">Select size</option>
             {DRINK_SIZES.map((size) => (
@@ -202,7 +201,7 @@ export default function Form({ trail_id, location_id }: FormProps) {
           </div>
         </div>
 
-        {/* Is Alcoholic */}
+        {/* Is Alcoholic - automatically disabled for soft drinks */}
         <div className="mb-4 flex items-center">
           <input
             id="isAlcoholic"
@@ -218,6 +217,7 @@ export default function Form({ trail_id, location_id }: FormProps) {
           </label>
         </div>
 
+        {/* Form submission message */}
         <div aria-live="polite" aria-atomic="true">
           {state.message && (
             <p className={`mt-2 text-sm ${state.message.includes('Failed') ? 'text-red-500' : 'text-green-500'}`}>

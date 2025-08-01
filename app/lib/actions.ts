@@ -172,7 +172,8 @@ export async function createLocation(prevState: LocationState, formData: FormDat
 export interface DrinkState {
     errors: {
         size?: string[];
-        type?: string[];
+        category?: string[];
+        specific_type?: string[];
         beerType?: string[];
         cocktailType?: string[];
         softDrinkType?: string[];
@@ -183,47 +184,33 @@ export interface DrinkState {
 const DrinkFormSchema = z.object({
     trail_id: z.string(),
     location_id: z.string(),
-    size: z.enum(["0.2L", "0.33L", "0.5L", "1L"], { invalid_type_error: 'Please select a size.' }),
-    type: z.enum(["beer", "cocktail", "soft-drink"], { invalid_type_error: 'Please select a type.' }),
-    beerType: z.preprocess(val => val === null ? undefined : val, z.string().optional()),
-    cocktailType: z.preprocess(val => val === null ? undefined : val, z.string().optional()),
-    softDrinkType: z.preprocess(val => val === null ? undefined : val, z.string().optional()),
+    size: z.enum(["0.2L", "0.33L", "0.5L", "1L"], { 
+        invalid_type_error: 'Please select a size.',
+        required_error: 'Size is required.'
+    }),
+    category: z.enum(["beer", "cocktail", "soft-drink"], { 
+        invalid_type_error: 'Please select a category.',
+        required_error: 'Category is required.'
+    }),
+    specific_type: z.string({
+        required_error: 'Please select a specific drink type.'
+    }).min(1, 'Please select a specific drink type.'),
     isAlcoholic: z.preprocess((val) => val === 'on' || val === true, z.boolean()),
 });
 
 // Modified to ensure consistent return type
 export async function createDrink(prevState: DrinkState, formData: FormData): Promise<DrinkState> {
     // Get form data values for validation
-    const typeValue = formData.get('type') as string;
-    const beerTypeValue = formData.get('beerType') as string;
-    const cocktailTypeValue = formData.get('cocktailType') as string;
-    const softDrinkTypeValue = formData.get('softDrinkType') as string;
+    const categoryValue = formData.get('category') as string;
+    let specificType = '';
     
-    // Custom validation for drink type specific fields
-    const errors: DrinkState['errors'] = {
-        size: undefined,
-        type: undefined,
-        beerType: undefined,
-        cocktailType: undefined,
-        softDrinkType: undefined
-    };
-    
-    let hasErrors = false;
-    
-    // Check if the specific type field is required based on selected drink type
-    if (typeValue === 'beer' && (!beerTypeValue || beerTypeValue.trim() === '')) {
-        errors.beerType = ['Please select a beer type.'];
-        hasErrors = true;
-    }
-    
-    if (typeValue === 'cocktail' && (!cocktailTypeValue || cocktailTypeValue.trim() === '')) {
-        errors.cocktailType = ['Please select a cocktail type.'];
-        hasErrors = true;
-    }
-    
-    if (typeValue === 'soft-drink' && (!softDrinkTypeValue || softDrinkTypeValue.trim() === '')) {
-        errors.softDrinkType = ['Please select a soft drink type.'];
-        hasErrors = true;
+    // Determine the specific type based on the drink category
+    if (categoryValue === 'beer') {
+        specificType = formData.get('beerType') as string;
+    } else if (categoryValue === 'cocktail') {
+        specificType = formData.get('cocktailType') as string;
+    } else if (categoryValue === 'soft-drink') {
+        specificType = formData.get('softDrinkType') as string;
     }
     
     // Validate form fields using Zod
@@ -231,49 +218,47 @@ export async function createDrink(prevState: DrinkState, formData: FormData): Pr
         trail_id: formData.get('trail_id'),
         location_id: formData.get('location_id'),
         size: formData.get('size'),
-        type: typeValue,
-        beerType: beerTypeValue,
-        cocktailType: cocktailTypeValue,
-        softDrinkType: softDrinkTypeValue,
+        category: categoryValue,
+        specific_type: specificType,
         isAlcoholic: formData.get('isAlcoholic'),
     });
 
-    // Combine Zod validation errors with our custom errors
-    if (!validatedFields.success || hasErrors) {
-        const zodErrors = validatedFields.success ? {} : validatedFields.error.flatten().fieldErrors;
+    // If form validation fails, return errors
+    if (!validatedFields.success) {
+        const zodErrors = validatedFields.error.flatten().fieldErrors;
         
-        // Merge Zod errors with our custom errors
         return {
             errors: {
-                ...errors,
-                size: zodErrors.size || errors.size,
-                type: zodErrors.type || errors.type,
+                size: zodErrors.size,
+                category: zodErrors.category,
+                specific_type: zodErrors.specific_type,
+                // Map specific_type errors to the appropriate type field
+                beerType: categoryValue === 'beer' ? zodErrors.specific_type : undefined,
+                cocktailType: categoryValue === 'cocktail' ? zodErrors.specific_type : undefined,
+                softDrinkType: categoryValue === 'soft-drink' ? zodErrors.specific_type : undefined,
             },
             message: 'Missing Fields. Failed to Create Drink.',
         };
     }
 
-    const validData = validatedFields.data;
-    const { trail_id, location_id, size, type, beerType, cocktailType, softDrinkType, isAlcoholic } = validData;
-
-    // Build drink_type JSON for DB
-    let drink_type: any = {};
-    if (type === 'beer') drink_type.beerType = beerType;
-    if (type === 'cocktail') drink_type.cocktailType = cocktailType;
-    if (type === 'soft-drink') drink_type.softDrinkType = softDrinkType;
+    const { trail_id, location_id, size, category, specific_type, isAlcoholic } = validatedFields.data;
 
     try {
+        // Insert into our flattened database structure
         await sql`
-      INSERT INTO drinks (location_id, drink_type, size, type, is_alcoholic, beer_type, cocktail_type, soft_drink_type)
+      INSERT INTO drinks (
+        location_id, 
+        category, 
+        specific_type, 
+        size, 
+        is_alcoholic
+      )
       VALUES (
         ${location_id},
-        ${drink_type},
+        ${category},
+        ${specific_type},
         ${size},
-        ${type},
-        ${isAlcoholic},
-        ${beerType || null},
-        ${cocktailType || null},
-        ${softDrinkType || null}
+        ${isAlcoholic}
       )
     `;
     }
@@ -282,7 +267,8 @@ export async function createDrink(prevState: DrinkState, formData: FormData): Pr
         return {
             errors: { 
                 size: undefined,
-                type: undefined, 
+                category: undefined,
+                specific_type: undefined,
                 beerType: undefined, 
                 cocktailType: undefined, 
                 softDrinkType: undefined 
@@ -299,7 +285,8 @@ export async function createDrink(prevState: DrinkState, formData: FormData): Pr
         message: 'Drink added successfully.', 
         errors: { 
             size: undefined,
-            type: undefined, 
+            category: undefined,
+            specific_type: undefined,
             beerType: undefined, 
             cocktailType: undefined, 
             softDrinkType: undefined 
