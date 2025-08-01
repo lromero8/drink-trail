@@ -110,7 +110,7 @@ export async function fetchTrailWithLocationsById(trail_id: string): Promise<Tra
         t.description,
         t.created_at,
         COALESCE(json_agg(DISTINCT l.name) FILTER (WHERE l.id IS NOT NULL), '[]') AS location_names,
-        COALESCE(json_agg(DISTINCT d.drink_type->>'name') FILTER (WHERE d.id IS NOT NULL), '[]') AS drink_names
+        COALESCE(json_agg(DISTINCT d.specific_type) FILTER (WHERE d.id IS NOT NULL), '[]') AS drink_names
       FROM trails t
       LEFT JOIN locations l ON l.trail_id = t.id
       LEFT JOIN drinks d ON d.location_id = l.id
@@ -206,4 +206,43 @@ export async function fetchDrinksByLocationId(location_id: string): Promise<Drin
     console.error('Database Error:', error);
     throw new Error('Failed to fetch drinks by location ID.');
   } 
+}
+
+// Interface for location with its drinks
+export interface LocationWithDrinks {
+  id: string;
+  trail_id: string;
+  name: string;
+  drinks: DrinkDisplay[];
+}
+
+// Fetch all locations with their drinks for a specific trail
+export async function fetchLocationsWithDrinksByTrailId(trail_id: string): Promise<LocationWithDrinks[]> {
+  try {
+    // First, fetch all locations for the trail
+    const locations = await sql`
+      SELECT id, trail_id, name
+      FROM locations
+      WHERE trail_id = ${trail_id}
+      ORDER BY name
+    `;
+    
+    // For each location, fetch its drinks
+    const locationsWithDrinks = await Promise.all(
+      locations.map(async (location: any) => {
+        const drinks = await fetchDrinksByLocationId(location.id);
+        return {
+          id: location.id,
+          trail_id: location.trail_id,
+          name: location.name,
+          drinks
+        };
+      })
+    );
+    
+    return locationsWithDrinks;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch locations with drinks.');
+  }
 }
