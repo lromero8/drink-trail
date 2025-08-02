@@ -48,7 +48,8 @@ async function createSchema() {
     CREATE TABLE IF NOT EXISTS locations (
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
       trail_id UUID NOT NULL REFERENCES trails(id) ON DELETE CASCADE,
-      name VARCHAR(255) NOT NULL
+      name VARCHAR(255) NOT NULL,
+      created_at DATE NOT NULL
     );
   `;
 
@@ -60,7 +61,8 @@ async function createSchema() {
       category VARCHAR(50) NOT NULL CHECK (category IN ('beer', 'cocktail', 'soft-drink')),
       specific_type VARCHAR(50) NOT NULL,
       size VARCHAR(10) NOT NULL CHECK (size IN ('0.2L', '0.33L', '0.5L', '1L')),
-      is_alcoholic BOOLEAN NOT NULL
+      is_alcoholic BOOLEAN NOT NULL,
+      created_at DATE NOT NULL
     );
   `;
 }

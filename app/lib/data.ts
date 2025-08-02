@@ -13,6 +13,7 @@ export interface DrinkDisplay {
   typeName: string; // specific type: Cola, Mojito, etc.
   size: string;
   isAlcoholic: boolean;
+  created_at: string;
 }
 
 
@@ -140,7 +141,8 @@ export async function fetchLocationById(location_id: string) {
       SELECT
         locations.id,
         locations.trail_id,
-        locations.name
+        locations.name,
+        locations.created_at
       FROM locations
       WHERE locations.id = ${location_id};
     `;
@@ -149,7 +151,8 @@ export async function fetchLocationById(location_id: string) {
     return {
       id: data[0].id,
       trail_id: data[0].trail_id,
-      name: data[0].name
+      name: data[0].name,
+      created_at: data[0].created_at
     };
   }
   catch (error) {
@@ -168,7 +171,8 @@ export async function fetchDrinksByLocationId(location_id: string): Promise<Drin
         category,
         specific_type,
         size,
-        is_alcoholic
+        is_alcoholic,
+        created_at
       FROM drinks
       WHERE location_id = ${location_id};
     `;
@@ -187,7 +191,8 @@ export async function fetchDrinksByLocationId(location_id: string): Promise<Drin
           type: 'Unknown',
           typeName: 'Unknown',
           size: 'Unknown',
-          isAlcoholic: false
+          isAlcoholic: false,
+          created_at: new Date().toISOString().split('T')[0]
         };
       }
 
@@ -198,7 +203,8 @@ export async function fetchDrinksByLocationId(location_id: string): Promise<Drin
         type: drink.category,
         typeName: drink.specific_type,
         size: drink.size,
-        isAlcoholic: drink.is_alcoholic
+        isAlcoholic: drink.is_alcoholic,
+        created_at: drink.created_at
       };
     });
   }
@@ -213,6 +219,7 @@ export interface LocationWithDrinks {
   id: string;
   trail_id: string;
   name: string;
+  created_at: string;
   drinks: DrinkDisplay[];
 }
 
@@ -221,7 +228,7 @@ export async function fetchLocationsWithDrinksByTrailId(trail_id: string): Promi
   try {
     // First, fetch all locations for the trail
     const locations = await sql`
-      SELECT id, trail_id, name
+      SELECT id, trail_id, name, created_at
       FROM locations
       WHERE trail_id = ${trail_id}
       ORDER BY name
@@ -235,6 +242,7 @@ export async function fetchLocationsWithDrinksByTrailId(trail_id: string): Promi
           id: location.id,
           trail_id: location.trail_id,
           name: location.name,
+          created_at: location.created_at,
           drinks
         };
       })

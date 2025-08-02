@@ -47,12 +47,14 @@ export interface Drink {
   specific_type: string;    // The specific type (e.g., 'Cola', 'Mojito')
   size: DrinkSize;
   is_alcoholic: boolean;
+  created_at: string;
 }
 
 export interface Location {
   id: string;
   trail_id: string;
   name: string;
+  created_at: string;
 }
 
 export interface Trail {

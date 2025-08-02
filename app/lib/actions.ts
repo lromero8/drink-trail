@@ -151,11 +151,12 @@ export async function createLocation(prevState: LocationState, formData: FormDat
     // Get trail_id directly from formData (not validated)
     const trail_id = String(formData.get('trail_id'));
     const { name } = validatedFields.data;
+    const created_at = new Date().toISOString().split('T')[0];
     let newLocationId;
     try {
         const result = await sql`
-            INSERT INTO locations (trail_id, name)
-            VALUES (${trail_id}, ${name})
+            INSERT INTO locations (trail_id, name, created_at)
+            VALUES (${trail_id}, ${name}, ${created_at})
             RETURNING id
         `;
         newLocationId = result[0].id;
@@ -242,6 +243,7 @@ export async function createDrink(prevState: DrinkState, formData: FormData): Pr
     }
 
     const { trail_id, location_id, size, category, specific_type, isAlcoholic } = validatedFields.data;
+    const created_at = new Date().toISOString().split('T')[0];
 
     try {
         // Insert into our flattened database structure
@@ -251,14 +253,16 @@ export async function createDrink(prevState: DrinkState, formData: FormData): Pr
         category, 
         specific_type, 
         size, 
-        is_alcoholic
+        is_alcoholic,
+        created_at
       )
       VALUES (
         ${location_id},
         ${category},
         ${specific_type},
         ${size},
-        ${isAlcoholic}
+        ${isAlcoholic},
+        ${created_at}
       )
     `;
     }

@@ -42,6 +42,9 @@ export default async function Page(props: { params: Promise<{ trail_id: string; 
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Alcoholic
                             </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Drank On
+                            </th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -58,6 +61,9 @@ export default async function Page(props: { params: Promise<{ trail_id: string; 
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {drink.isAlcoholic ? 'Yes' : 'No'}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {new Date(drink.created_at).toLocaleDateString()}
                                 </td>
                             </tr>
                         ))}
