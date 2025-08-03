@@ -134,7 +134,7 @@ const LocationFormSchema = z.object({
 
 const CreateLocation = LocationFormSchema.omit({ id: true });
 
-export async function createLocation(prevState: LocationState, formData: FormData) {
+export async function createLocation(prevState: LocationState, formData: FormData): Promise<LocationState> {
     // Validate form fields using Zod (only name)
     const validatedFields = CreateLocation.safeParse({
         name: formData.get('name')
@@ -152,21 +152,28 @@ export async function createLocation(prevState: LocationState, formData: FormDat
     const trail_id = String(formData.get('trail_id'));
     const { name } = validatedFields.data;
     const created_at = new Date().toISOString().split('T')[0];
-    let newLocationId;
     try {
-        const result = await sql`
+        await sql`
             INSERT INTO locations (trail_id, name, created_at)
             VALUES (${trail_id}, ${name}, ${created_at})
             RETURNING id
         `;
-        newLocationId = result[0].id;
     }
     catch (error) {
         console.error(error);
+        return {
+            errors: {},
+            message: 'Database error. Failed to Create Location.',
+        };
     }
 
-    revalidatePath(`/dashboard/trails/${trail_id}/locations/${newLocationId}`);
-    redirect(`/dashboard/trails/${trail_id}/locations/${newLocationId}`);
+    revalidatePath(`/dashboard/trails/${trail_id}/locations`);
+    
+    // Return a success message
+    return { 
+        message: 'Location created successfully.', 
+        errors: {} 
+    };
 }
 
 

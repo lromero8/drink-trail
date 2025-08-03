@@ -7,18 +7,17 @@ import {
   MapPinIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
-import { TrailWithLocationsAndDrinks } from '@/app/lib/data';
 
 interface FormProps {
-  trail: TrailWithLocationsAndDrinks;
+  trail_id: string;
 }
 
-export default function Form({ trail }: FormProps) {
+export default function Form({ trail_id }: FormProps) {
   const initialState: LocationState = { message: null, errors: {} };
   const [state, formAction] = useActionState(createLocation, initialState);
   return (
     <form action={formAction}>
-      <input type="hidden" name="trail_id" value={trail.id} />
+      <input type="hidden" name="trail_id" value={trail_id} />
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Location name */}
         <div className="mb-4">

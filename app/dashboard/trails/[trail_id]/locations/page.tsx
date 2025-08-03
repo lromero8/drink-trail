@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { fetchTrailById, fetchLocationsWithDrinksByTrailId } from '@/app/lib/data';
 import Breadcrumbs from '@/app/ui/trails/breadcrumbs';
-import { CreateLocation } from '@/app/ui/locations/buttons';
+import Form from '@/app/ui/locations/create-form';
 import { notFound } from 'next/navigation';
  
 export const metadata: Metadata = {
@@ -35,8 +35,8 @@ export default async function Page(props: { params: Promise<{ trail_id: string }
                 <p className="text-gray-500">{trail.description}</p>
             </div>
 
-            <div className="flex items-center justify-end mb-4">
-                <CreateLocation trail_id={trail_id} />
+            <div className='mb-8'>
+                <Form trail_id={trail_id} />
             </div>
 
             {locationsWithDrinks.length === 0 ? (
