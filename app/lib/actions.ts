@@ -6,6 +6,7 @@ import postgres from 'postgres';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { getAuthenticatedUserId } from './auth-utils';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -65,15 +66,18 @@ export async function createTrail(prevState: TrailState, formData: FormData) {
             message: 'Missing Fields. Failed to Create Trail.',
         };
     }
-    
+
+    // Get the authenticated user ID - will throw an error if user is not authenticated
+    const userId = await getAuthenticatedUserId();
+
     // Prepare data for insertion into the database
     const { name, description } = validatedFields.data;
     const created_at = new Date().toISOString().split('T')[0];
     let newTrailId;
     try {
         const result = await sql`
-            INSERT INTO trails (name, description, created_at)
-            VALUES (${name}, ${description}, ${created_at})
+            INSERT INTO trails (name, description, created_at, user_id)
+            VALUES (${name}, ${description}, ${created_at}, ${userId})
             RETURNING id
         `;
         newTrailId = result[0].id;
@@ -100,14 +104,16 @@ export async function updateTrail(id: string, prevState: TrailState, formData: F
         };
     }
 
+    // Get the authenticated user ID
+    const userId = await getAuthenticatedUserId();
+
     const { name, description } = validatedFields.data;
 
     try {
-    
         await sql`
             UPDATE trails
             SET name = ${name}, description = ${description}
-            WHERE id = ${id}
+            WHERE id = ${id} AND user_id = ${userId}
         `;
     }
     catch (error) {

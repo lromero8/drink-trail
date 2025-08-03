@@ -62,10 +62,12 @@ export interface Trail {
   name: string;
   description: string;
   created_at: string;
+  user_id: string;
 }
 
 export interface TrailForm {
   id: string;
   name: string;
   description: string;
+  user_id?: string;
 };

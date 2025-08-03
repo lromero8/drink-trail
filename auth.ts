@@ -42,4 +42,21 @@ export const { auth, signIn, signOut } = NextAuth({
             }
         })
     ],
+    callbacks: {
+        // Include user id in the session
+        async session({ session, token }) {
+            if (session?.user && token.sub) {
+                session.user.id = token.sub;
+            }
+            return session;
+        },
+        // Make sure token.sub is set to user.id
+        async jwt({ token, user }) {
+            if (user) {
+                // Ensure the ID is correctly assigned
+                token.sub = user.id;
+            }
+            return token;
+        }
+    }
 });

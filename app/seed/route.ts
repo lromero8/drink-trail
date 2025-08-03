@@ -37,6 +37,7 @@ async function createSchema() {
   await sql`
     CREATE TABLE IF NOT EXISTS trails (
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       name VARCHAR(255) NOT NULL,
       description VARCHAR(255) NOT NULL,
       created_at DATE NOT NULL

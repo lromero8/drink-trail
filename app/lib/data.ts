@@ -1,5 +1,6 @@
 import postgres from 'postgres';
 import { Trail, TrailForm } from './definitions';
+import { getAuthenticatedUserId } from './auth-utils';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -24,19 +25,21 @@ export interface TrailWithLocationNames extends Trail {
 
 export async function fetchTrailById(id: string) {
   try {
+    const userId = await getAuthenticatedUserId();
+
     const data = await sql<TrailForm[]>`
       SELECT
         trails.id,
         trails.name,
         trails.description
       FROM trails
-      WHERE trails.id = ${id};
+      WHERE trails.id = ${id} AND trails.user_id = ${userId};
     `;
 
     return data[0];
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch trail.');
+  }
+  catch (error) {
+    throw new Error(`Failed to fetch trail. ${error}`);
   }
 }
 
@@ -47,22 +50,26 @@ export async function fetchFilteredTrails(
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
+    const userId = await getAuthenticatedUserId();
+
     const trails = await sql`
       SELECT
         t.id,
         t.name,
         t.description,
         t.created_at,
+        t.user_id,
         COALESCE(
           json_agg(l.name) FILTER (WHERE l.id IS NOT NULL), '[]'
         ) AS location_names
       FROM trails t
       LEFT JOIN locations l ON l.trail_id = t.id
       WHERE
-        t.name ILIKE ${`%${query}%`} OR
+        t.user_id = ${userId} AND
+        (t.name ILIKE ${`%${query}%`} OR
         t.description ILIKE ${`%${query}%`} OR
-        t.created_at::text ILIKE ${`%${query}%`}
-      GROUP BY t.id, t.name, t.description, t.created_at
+        t.created_at::text ILIKE ${`%${query}%`})
+      GROUP BY t.id, t.name, t.description, t.created_at, t.user_id
       ORDER BY t.created_at DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
@@ -80,12 +87,15 @@ export async function fetchFilteredTrails(
 
 export async function fetchTrailsPages(query: string) {
   try {
+    const userId = await getAuthenticatedUserId();
+
     const data = await sql`SELECT COUNT(*)
     FROM trails
     WHERE
-      trails.name::text ILIKE ${`%${query}%`} OR
+      user_id = ${userId} AND
+      (trails.name::text ILIKE ${`%${query}%`} OR
       trails.description::text ILIKE ${`%${query}%`} OR
-      trails.created_at::text ILIKE ${`%${query}%`}
+      trails.created_at::text ILIKE ${`%${query}%`})
   `;
 
     const totalPages = Math.ceil(Number(data[0].count) / ITEMS_PER_PAGE);
