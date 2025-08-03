@@ -107,32 +107,6 @@ export async function fetchTrailsPages(query: string) {
   }
 }
 
-export async function fetchLocationById(location_id: string) {
-  try {
-    const data = await sql`
-      SELECT
-        locations.id,
-        locations.trail_id,
-        locations.name,
-        locations.created_at
-      FROM locations
-      WHERE locations.id = ${location_id};
-    `;
-
-    if (!data[0]) return null;
-    return {
-      id: data[0].id,
-      trail_id: data[0].trail_id,
-      name: data[0].name,
-      created_at: data[0].created_at
-    };
-  }
-  catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch location by ID.');
-  }
-}
-
 export async function fetchDrinksByLocationId(location_id: string): Promise<DrinkDisplay[]> {
   try {
     // Direct query using the new flattened structure
