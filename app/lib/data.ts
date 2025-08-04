@@ -158,7 +158,7 @@ export async function fetchDrinksByLocationId(location_id: string): Promise<Drin
 }
 
 // Interface for location with its drinks
-export interface LocationWithDrinks {
+interface LocationWithDrinks {
   id: string;
   trail_id: string;
   name: string;
