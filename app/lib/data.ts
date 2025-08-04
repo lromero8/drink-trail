@@ -169,12 +169,11 @@ interface LocationWithDrinks {
 // Fetch all locations with their drinks for a specific trail
 export async function fetchLocationsWithDrinksByTrailId(trail_id: string): Promise<LocationWithDrinks[]> {
   try {
-    // First, fetch all locations for the trail
     const locations = await sql`
       SELECT id, trail_id, name, created_at
       FROM locations
       WHERE trail_id = ${trail_id}
-      ORDER BY name
+      ORDER BY created_at DESC
     `;
     
     // For each location, fetch its drinks
