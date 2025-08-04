@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { fetchLocationsWithDrinksByTrailId } from '@/app/lib/data';
+import { formatDateTimeToLocal } from '@/app/lib/utils';
 
 export default async function LocationsList({
     trail_id,
@@ -24,7 +25,9 @@ export default async function LocationsList({
                             className="block rounded-lg border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow"
                         >
                             <h2 className="text-xl font-semibold mb-2">{location.name}</h2>
-                            <p className="text-xs text-gray-500 mb-2">Visited on {new Date(location.created_at).toLocaleDateString()}</p>
+                            <p className="text-xs text-gray-500 mb-2">
+                                Visited on {formatDateTimeToLocal(location.created_at)}
+                            </p>
                             <div className="border-t border-gray-100 pt-2 mt-2">
                                 <p className="text-gray-500 mb-1">
                                     {location.drinks.length} {location.drinks.length === 1 ? 'drink' : 'drinks'} available

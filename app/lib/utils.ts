@@ -12,6 +12,36 @@ export const formatDateToLocal = (
     return formatter.format(date);
 };
 
+export const formatDateTimeToLocal = (
+    dateStr: string | Date,
+    locale: string = 'en-US',
+) => {
+    try {
+        // Simple conversion to Date object
+        const date = new Date(dateStr);
+        
+        // Check if the date is valid
+        if (isNaN(date.getTime())) {
+            return 'Invalid date';
+        }
+        
+        // Format with date and time
+        const options: Intl.DateTimeFormatOptions = {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+        };
+        
+        const formatter = new Intl.DateTimeFormat(locale, options);
+        return formatter.format(date);
+    } catch (error) {
+        return String(dateStr);
+    }
+};
+
 export const generatePagination = (currentPage: number, totalPages: number) => {
     // If the total number of pages is 7 or less,
     // display all pages without any ellipsis.
