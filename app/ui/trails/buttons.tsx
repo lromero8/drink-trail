@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { PlusIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { deleteTrail } from '@/app/lib/actions';
 
 export function CreateTrail() {
   return (
@@ -21,5 +22,18 @@ export function UpdateTrail({ id }: { id: string }) {
     >
       <PencilIcon className="w-5" />
     </Link>
+  );
+}
+
+export function DeleteTrail({ id }: { id: string }) {
+  const deleteTrailWithId = deleteTrail.bind(null, id);
+
+  return (
+    <form action={deleteTrailWithId}>
+      <button type="submit" className="rounded-md border p-2 hover:bg-gray-100">
+        <span className="sr-only">Delete</span>
+        <TrashIcon className="w-4" />
+      </button>
+    </form>
   );
 }

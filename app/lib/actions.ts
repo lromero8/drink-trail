@@ -124,6 +124,11 @@ export async function updateTrail(id: string, prevState: TrailState, formData: F
     redirect('/dashboard/trails');
 }
 
+export async function deleteTrail(id: string) {
+    await sql`DELETE FROM trails WHERE id = ${id}`;
+    revalidatePath('/dashboard/trails');
+}
+
 export interface LocationState {
     errors?: {
         name?: string[];
