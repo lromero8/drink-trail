@@ -72,7 +72,10 @@ export async function createTrail(prevState: TrailState, formData: FormData) {
 
     // Prepare data for insertion into the database
     const { name, description } = validatedFields.data;
-    const created_at = new Date().toISOString().split('T')[0];
+    
+    // Use full ISO timestamp instead of just the date portion
+    const created_at = new Date().toISOString();
+    
     let newTrailId;
     try {
         const result = await sql`
@@ -162,7 +165,10 @@ export async function createLocation(prevState: LocationState, formData: FormDat
     // Get trail_id directly from formData (not validated)
     const trail_id = String(formData.get('trail_id'));
     const { name } = validatedFields.data;
-    const created_at = new Date().toISOString().split('T')[0];
+    
+    // Use current timestamp
+    const created_at = new Date().toISOString();
+    
     try {
         await sql`
             INSERT INTO locations (trail_id, name, created_at)
@@ -261,7 +267,9 @@ export async function createDrink(prevState: DrinkState, formData: FormData): Pr
     }
 
     const { trail_id, location_id, size, category, specific_type, isAlcoholic } = validatedFields.data;
-    const created_at = new Date().toISOString().split('T')[0];
+    
+    // Use full ISO timestamp instead of just the date portion
+    const created_at = new Date().toISOString();
 
     try {
         // Insert into our flattened database structure
