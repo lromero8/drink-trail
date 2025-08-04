@@ -1,6 +1,7 @@
 import Breadcrumbs from "@/app/ui/trails/breadcrumbs";
 import Form from '@/app/ui/drinks/create-form';
 import DrinksTable from '@/app/ui/drinks/drinks-table';
+import BackToLocationsButton from '@/app/ui/drinks/buttons';
 
 
 export default async function Page(props: { params: Promise<{ trail_id: string; location_id: string }> }) {
@@ -24,6 +25,8 @@ export default async function Page(props: { params: Promise<{ trail_id: string; 
             <Form trail_id={trail_id} location_id={location_id} />
 
             <DrinksTable location_id={location_id} />
+            
+            <BackToLocationsButton trail_id={trail_id} />
         </main>
     );
 }
