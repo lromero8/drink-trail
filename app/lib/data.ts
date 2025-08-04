@@ -120,11 +120,6 @@ export async function fetchDrinksByLocationId(location_id: string): Promise<Drin
       WHERE location_id = ${location_id};
     `;
 
-    // Log the first drink to see structure
-    if (data.length > 0) {
-      console.log('Sample drink data with new schema:', JSON.stringify(data[0], null, 2));
-    }
-
     return data.map((drink: any) => {
       if (!drink) {
         console.error('Encountered null or undefined drink in result set');
@@ -158,7 +153,7 @@ export async function fetchDrinksByLocationId(location_id: string): Promise<Drin
 }
 
 // Interface for location with its drinks
-interface LocationWithDrinks {
+export interface LocationWithDrinks {
   id: string;
   trail_id: string;
   name: string;
