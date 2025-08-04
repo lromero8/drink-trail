@@ -49,11 +49,11 @@ export default function Form({ trail_id }: FormProps) {
       </div>
 
       <div aria-live="polite" aria-atomic="true">
-        {state.errors &&
-          <p className="mt-2 text-sm text-red-500">
+        {state.message && (
+          <p className={`mt-2 text-sm ${state.message.includes('Failed') ? 'text-red-500' : 'text-green-500'}`}>
             {state.message}
           </p>
-        }
+        )}
       </div>
     </div>
     <div className="mt-6 flex justify-end gap-4">
