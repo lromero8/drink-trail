@@ -6,19 +6,6 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 const ITEMS_PER_PAGE = 6;
 
-// Interface for the drink data returned from fetchDrinksByLocationId
-export interface DrinkDisplay {
-  id: string;
-  location_id: string;
-  type: string; // general category: beer, cocktail, soft-drink
-  typeName: string; // specific type: Cola, Mojito, etc.
-  size: string;
-  isAlcoholic: boolean;
-  created_at: string;
-}
-
-
-
 export interface TrailWithLocationNames extends Trail {
   location_names: string[];
 }
@@ -107,6 +94,16 @@ export async function fetchTrailsPages(query: string) {
   }
 }
 
+// Interface for the drink data returned from fetchDrinksByLocationId
+interface DrinkDisplay {
+  id: string;
+  location_id: string;
+  type: string; // general category: beer, cocktail, soft-drink
+  typeName: string; // specific type: Cola, Mojito, etc.
+  size: string;
+  isAlcoholic: boolean;
+  created_at: string;
+}
 export async function fetchDrinksByLocationId(location_id: string): Promise<DrinkDisplay[]> {
   try {
     // Direct query using the new flattened structure
