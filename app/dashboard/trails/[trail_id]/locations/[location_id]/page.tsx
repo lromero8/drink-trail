@@ -1,6 +1,6 @@
 import Breadcrumbs from "@/app/ui/trails/breadcrumbs";
 import Form from '@/app/ui/drinks/create-form';
-import DrinksTable from '@/app/ui/locations/drinks-table';
+import DrinksTable from '@/app/ui/drinks/drinks-table';
 
 
 export default async function Page(props: { params: Promise<{ trail_id: string; location_id: string }> }) {
