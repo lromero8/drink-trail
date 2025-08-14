@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { getAuthenticatedUserId } from './auth-utils';
+import bcrypt from 'bcrypt';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -28,6 +29,50 @@ export async function authenticate(
         }
         throw error;
     }
+}
+
+export async function createUser(
+    prevState: string | undefined,
+    formData: FormData,
+) {
+    try {
+        // Extract the form data
+        const name = formData.get('name') as string;
+        const email = formData.get('email') as string;
+        const password = formData.get('password') as string;
+
+        // Validate the form data
+        const validatedFields = z.object({
+            name: z.string().min(1, { message: 'Name is required' }),
+            email: z.string().email({ message: 'Invalid email address' }),
+            password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+        }).safeParse({ name, email, password });
+
+        if (!validatedFields.success) {
+            return 'Invalid form data. Please check your inputs.';
+        }
+
+        // Check if user already exists
+        const existingUser = await sql`SELECT email FROM users WHERE email = ${email}`;
+        if (existingUser.length > 0) {
+            return 'User with this email already exists';
+        }
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create a new user
+        await sql`
+            INSERT INTO users (name, email, password)
+            VALUES (${name}, ${email}, ${hashedPassword})
+        `;
+
+    } catch (error) {
+        console.error('Failed to create user:', error);
+        return 'Something went wrong while creating your account.';
+    }
+
+    redirect('/login');
 }
 
 export interface TrailState {
