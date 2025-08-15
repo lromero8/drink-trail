@@ -71,7 +71,7 @@ export default function LoginForm() {
           Log in <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
         </Button>
         <div className='text-center mt-3'>
-          <Link href="/signup" className="text-blue-500 hover:text-blue-600">
+          <Link href="/signup" className="text-orange-500 hover:text-orange-600">
             Sign up
           </Link>
         </div>
