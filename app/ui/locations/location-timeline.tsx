@@ -15,7 +15,7 @@ export default function LocationTimeline({ locations, trail_id }: LocationTimeli
             </div>
 
             {/* Vertical Timeline Line */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-blue-200"></div>
+            <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-orange-200"></div>
             
             <div className="space-y-12 py-6">
                 {locations.map((location, index) => {

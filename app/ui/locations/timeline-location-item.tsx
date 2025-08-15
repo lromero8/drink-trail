@@ -12,7 +12,7 @@ export default function TimelineLocationItem({ location, isEven, trail_id }: Tim
     return (
         <div className="relative py-4">
             {/* Timeline Circle */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 top-7 w-5 h-5 rounded-full bg-blue-500 border-2 border-white z-10"></div>
+            <div className="absolute left-1/2 transform -translate-x-1/2 top-7 w-5 h-5 rounded-full bg-orange-500 border-2 border-white z-10"></div>
             
             {/* Date on opposite side of content */}
             <div className={`
@@ -54,7 +54,7 @@ export default function TimelineLocationItem({ location, isEven, trail_id }: Tim
                                     </li>
                                 ))}
                                 {location.drinks.length > 3 && (
-                                    <li className="text-blue-500">
+                                    <li className="text-orange-500">
                                         +{location.drinks.length - 3} more...
                                     </li>
                                 )}
