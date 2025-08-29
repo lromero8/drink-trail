@@ -191,3 +191,28 @@ export async function fetchLocationsWithDrinksByTrailId(trail_id: string): Promi
     throw new Error('Failed to fetch locations with drinks.');
   }
 }
+
+// Count trails for the logged-in user
+export async function fetchTrailsCountForUser(): Promise<number> {
+  const userId = await getAuthenticatedUserId();
+  const data = await sql`SELECT COUNT(*) FROM trails WHERE user_id = ${userId}`;
+  return Number(data[0].count);
+}
+
+// Count locations for the logged-in user
+export async function fetchLocationsCountForUser(): Promise<number> {
+  const userId = await getAuthenticatedUserId();
+  const data = await sql`SELECT COUNT(*) FROM locations WHERE trail_id IN (SELECT id FROM trails WHERE user_id = ${userId})`;
+  return Number(data[0].count);
+}
+
+// Count alcoholic and non-alcoholic drinks for the logged-in user
+export async function fetchDrinksCountForUser(): Promise<{ alcoholic: number; nonAlcoholic: number }> {
+  const userId = await getAuthenticatedUserId();
+  const alcoholicData = await sql`SELECT COUNT(*) FROM drinks WHERE is_alcoholic = true AND location_id IN (SELECT id FROM locations WHERE trail_id IN (SELECT id FROM trails WHERE user_id = ${userId}))`;
+  const nonAlcoholicData = await sql`SELECT COUNT(*) FROM drinks WHERE is_alcoholic = false AND location_id IN (SELECT id FROM locations WHERE trail_id IN (SELECT id FROM trails WHERE user_id = ${userId}))`;
+  return {
+    alcoholic: Number(alcoholicData[0].count),
+    nonAlcoholic: Number(nonAlcoholicData[0].count)
+  };
+}
